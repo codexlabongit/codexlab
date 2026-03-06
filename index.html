@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodexLab - Projets numériques</title>
+    <title>CodexLab - Showcase</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <h1>CodexLab</h1>
-        <p>Scripts, bots et projets personnalisés</p>
+        <p>Vos projets numériques, présentés avec style</p>
     </header>
 
     <section id="projets">
         <h2>Mes Projets</h2>
-        <div class="projet">
-            <h3>Script Python sur mesure</h3>
-            <p>Création de scripts personnalisés pour automatisation, bots Discord et IA locale.</p>
-        </div>
-        <div class="projet">
-            <h3>Dossiers personnalisés</h3>
-            <p>Organisation et préparation de dossiers pour projets spécifiques.</p>
+        <div class="grid">
+            <!-- Bloc projet -->
+            <div class="projet" onclick="toggleDescription(this)">
+                <div class="placeholder">Titre du projet</div>
+                <div class="description">Description du projet ici...</div>
+            </div>
+            <div class="projet" onclick="toggleDescription(this)">
+                <div class="placeholder">Titre du projet</div>
+                <div class="description">Description du projet ici...</div>
+            </div>
+            <div class="projet" onclick="toggleDescription(this)">
+                <div class="placeholder">Titre du projet</div>
+                <div class="description">Description du projet ici...</div>
+            </div>
+            <div class="projet" onclick="toggleDescription(this)">
+                <div class="placeholder">Titre du projet</div>
+                <div class="description">Description du projet ici...</div>
+            </div>
         </div>
     </section>
 
@@ -33,5 +44,12 @@
     <footer>
         <p>© 2026 CodexLab</p>
     </footer>
+
+    <script>
+        function toggleDescription(el) {
+            const desc = el.querySelector('.description');
+            desc.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

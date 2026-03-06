@@ -1,33 +1,98 @@
+/* --- Reset et style de base --- */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background: #f4f4f4;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f2f5;
     color: #333;
 }
 
 header {
-    background: #222;
+    background: #1b1b2f;
     color: white;
-    padding: 20px;
     text-align: center;
+    padding: 2rem 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+header h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+header p {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+    color: #ccc;
 }
 
 section {
-    padding: 20px;
-    margin: 10px auto;
-    max-width: 800px;
-    background: white;
-    border-radius: 8px;
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* --- Grid pour projets --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
 }
 
 .projet {
-    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+
+.projet:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* Placeholder pour titre / image */
+.placeholder {
+    height: 150px;
+    background: linear-gradient(135deg, #74ebd5, #acb6e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.2rem;
+}
+
+/* Description cachée par défaut */
+.description {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1rem;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    font-size: 0.95rem;
+    line-height: 1.4rem;
+    color: #555;
+}
+
+/* Quand active */
+.description.active {
+    max-height: 200px;
+    padding: 1rem;
+}
+
+/* Contact / footer */
+#contact a {
+    color: #1b1b2f;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 footer {
     text-align: center;
-    padding: 10px;
-    font-size: 0.9em;
-    color: #777;
+    padding: 1rem;
+    background: #1b1b2f;
+    color: #ccc;
+    margin-top: 3rem;
 }

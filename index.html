@@ -9,13 +9,12 @@
 <body>
     <header>
         <h1>CodexLab</h1>
-        <p>Vos projets numériques, présentés avec style</p>
+        <p>Vos projets numériques présentés avec style et interactivité</p>
     </header>
 
     <section id="projets">
         <h2>Mes Projets</h2>
         <div class="grid">
-            <!-- Bloc projet -->
             <div class="projet" onclick="toggleDescription(this)">
                 <div class="placeholder">Titre du projet</div>
                 <div class="description">Description du projet ici...</div>
@@ -35,6 +34,28 @@
         </div>
     </section>
 
+    <section id="stats">
+        <h2>Statistiques</h2>
+        <div class="stat-grid">
+            <div class="stat">
+                <h3>0</h3>
+                <p>Projets réalisés</p>
+            </div>
+            <div class="stat">
+                <h3>0</h3>
+                <p>Clients satisfaits</p>
+            </div>
+            <div class="stat">
+                <h3>0</h3>
+                <p>Lignes de code</p>
+            </div>
+            <div class="stat">
+                <h3>0</h3>
+                <p>Scripts distribués</p>
+            </div>
+        </div>
+    </section>
+
     <section id="contact">
         <h2>Contact</h2>
         <p>Pour me contacter et commander un projet :</p>
@@ -46,10 +67,23 @@
     </footer>
 
     <script>
+        // Toggle description
         function toggleDescription(el) {
             const desc = el.querySelector('.description');
             desc.classList.toggle('active');
         }
+
+        // Animation pour stats (compteur simple)
+        const stats = document.querySelectorAll('.stat h3');
+        stats.forEach(stat => {
+            let count = 0;
+            const target = 100; // valeur par défaut
+            const interval = setInterval(() => {
+                count++;
+                stat.textContent = count;
+                if(count >= target) clearInterval(interval);
+            }, 20);
+        });
     </script>
 </body>
 </html>

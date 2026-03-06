@@ -4,85 +4,119 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f2f5;
     color: #333;
+    scroll-behavior: smooth;
 }
 
 header {
     background: #1b1b2f;
     color: white;
     text-align: center;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    animation: fadeIn 1s ease forwards;
 }
 
 header h1 {
-    font-size: 3rem;
+    font-size: 3.5rem;
     margin: 0;
 }
 
 header p {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-top: 0.5rem;
     color: #ccc;
 }
 
+/* --- Section Projets --- */
 section {
     max-width: 1000px;
-    margin: 2rem auto;
+    margin: 3rem auto;
     padding: 0 1rem;
+    animation: fadeInUp 1s ease forwards;
 }
 
-/* --- Grid pour projets --- */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
 }
 
 .projet {
     background: #fff;
-    border-radius: 15px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
     position: relative;
+    transform: translateY(0);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 .projet:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
 }
 
-/* Placeholder pour titre / image */
 .placeholder {
-    height: 150px;
+    height: 250px;
     background: linear-gradient(135deg, #74ebd5, #acb6e5);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    transition: background 0.5s ease;
 }
 
-/* Description cachée par défaut */
+.projet:hover .placeholder {
+    background: linear-gradient(135deg, #acb6e5, #74ebd5);
+}
+
 .description {
     max-height: 0;
     overflow: hidden;
     padding: 0 1rem;
     transition: max-height 0.5s ease, padding 0.5s ease;
-    font-size: 0.95rem;
-    line-height: 1.4rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
     color: #555;
 }
 
-/* Quand active */
 .description.active {
-    max-height: 200px;
+    max-height: 300px;
     padding: 1rem;
 }
 
-/* Contact / footer */
+/* --- Section Stats --- */
+#stats {
+    background: #222;
+    color: white;
+    padding: 3rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2rem;
+    text-align: center;
+}
+
+.stat h3 {
+    font-size: 2.5rem;
+    margin: 0;
+    color: #74ebd5;
+    transition: transform 0.3s ease;
+}
+
+.stat p {
+    margin-top: 0.5rem;
+    font-weight: bold;
+}
+
+/* --- Contact & Footer --- */
 #contact a {
     color: #1b1b2f;
     text-decoration: none;
@@ -91,8 +125,18 @@ section {
 
 footer {
     text-align: center;
-    padding: 1rem;
+    padding: 1.5rem;
     background: #1b1b2f;
     color: #ccc;
-    margin-top: 3rem;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    0% {opacity: 0; transform: translateY(-20px);}
+    100% {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes fadeInUp {
+    0% {opacity: 0; transform: translateY(20px);}
+    100% {opacity: 1; transform: translateY(0);}
 }

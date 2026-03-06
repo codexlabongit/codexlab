@@ -15,13 +15,13 @@
 </header>
 
 <section id="projets">
-  <h2>   Les Projets</h2>
+  <h2>Mes Projets</h2>
   <div class="grid">
     <div class="projet" 
          onclick="openProject(this)" 
          data-title="Alpha" 
          data-price="49€" 
-         data-desc="Principe : Générateur avancé de mots de passe." 
+         data-desc="Principe : Générateur avancé de mots de passe.\n- Sécurisation optimale\n- Analyse statistique intégrée\n- Comparatif historique des performances"
          data-chart='[20,50,80,60,40]' 
          data-commands="3 commandes">
       <div class="placeholder">Projet Alpha</div>
@@ -30,7 +30,7 @@
          onclick="openProject(this)" 
          data-title="Beta" 
          data-price="29€" 
-         data-desc="Principe : Analyseur statistique de mots de passe." 
+         data-desc="Principe : Analyseur statistique de mots de passe.\n- Evaluation des risques\n- Génération de rapports\n- Graphiques dynamiques"
          data-chart='[10,30,60,80,50]' 
          data-commands="5 commandes">
       <div class="placeholder">Projet Beta</div>
@@ -43,7 +43,7 @@
   <div class="modal-content">
     <span class="close" onclick="closeProject()">&times;</span>
     <div class="modal-header">
-      <h2 id="modalTitle">Titre</h2>
+      <h2 id="modalTitle">Titre Projet</h2>
       <span id="modalPrice">0€</span>
     </div>
     <div class="modal-body">
@@ -56,6 +56,9 @@
         <p id="modalCommands"></p>
       </div>
     </div>
+    <div class="modal-footer">
+      <a href="mailto:contact@codexlab.com" class="contact-btn">📧 Envoyer un message</a>
+    </div>
   </div>
 </div>
 
@@ -65,7 +68,7 @@ function openProject(el){
   const modal = document.getElementById('projectModal');
   document.getElementById('modalTitle').textContent = el.dataset.title;
   document.getElementById('modalPrice').textContent = el.dataset.price;
-  document.getElementById('modalDesc').textContent = el.dataset.desc;
+  document.getElementById('modalDesc').innerHTML = el.dataset.desc.replace(/\n/g,'<br>');
   document.getElementById('modalCommands').textContent = el.dataset.commands;
 
   createPaintballEffect(el);
@@ -95,30 +98,35 @@ function openProject(el){
   });
 
   modal.classList.add('active');
+
+  // Animation fade-in pour contenu
+  const content = modal.querySelector('.modal-content');
+  content.style.opacity=0;
+  setTimeout(()=>{content.style.opacity=1;},50);
 }
 
 // Fermer modal
 function closeProject(){
-  document.getElementById('projectModal').classList.remove('active');
+  const modal = document.getElementById('projectModal');
+  modal.classList.remove('active');
 }
 
 // Dispersion style paintball
 function createPaintballEffect(el){
-  const count = 30;
+  const count = 40;
   const body = document.body;
   for(let i=0;i<count;i++){
     const dot = document.createElement('div');
     dot.className='paintball';
     dot.style.left = el.offsetLeft + el.offsetWidth/2 + 'px';
     dot.style.top = el.offsetTop + el.offsetHeight/2 + 'px';
-    const x = (Math.random()-0.5)*300;
-    const y = (Math.random()-0.5)*300;
+    const x = (Math.random()-0.5)*400;
+    const y = (Math.random()-0.5)*400;
     dot.style.transform = `translate(${x}px,${y}px)`;
     body.appendChild(dot);
-    setTimeout(()=>dot.remove(),800);
+    setTimeout(()=>dot.remove(),900);
   }
 }
 </script>
-
 </body>
 </html>

@@ -6,6 +6,8 @@
 <title>CodexLab - Showcase</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Import particle-explosions -->
+<script src="https://cdn.jsdelivr.net/gh/TomMcKenna1/particle-explosions@master/dist/particle-explosions.min.js"></script>
 </head>
 <body>
 
@@ -63,19 +65,32 @@
 </div>
 
 <script>
-// Ouvrir projet avec dispersion
+// Explosion Paint Particle
+function createExplosion(x, y){
+  ParticleExplosion.spawn({
+    x: x,
+    y: y,
+    count: 50,
+    spread: 180,
+    size: 8,
+    colors: ['#74ebd5','#acb6e5','#ff6f61','#fcd34d'],
+    gravity: 0.5
+  });
+}
+
+// Ouvrir projet
 function openProject(el){
   const modal = document.getElementById('projectModal');
   document.getElementById('modalTitle').textContent = el.dataset.title;
   document.getElementById('modalPrice').textContent = el.dataset.price;
-  
-  // Remplacer \n par <br> pour multi-lignes
   document.getElementById('modalDesc').innerHTML = el.dataset.desc.replace(/\n/g,'<br>');  
   document.getElementById('modalCommands').textContent = el.dataset.commands;
 
-  createPaintballEffect(el);
+  // Explosion au clic
+  const rect = el.getBoundingClientRect();
+  createExplosion(rect.left + rect.width/2, rect.top + rect.height/2);
 
-  // Remplir graphique
+  // Graphique
   const data = JSON.parse(el.dataset.chart);
   const ctx = document.getElementById('statsChart').getContext('2d');
   if(window.myChart) window.myChart.destroy();
@@ -100,34 +115,11 @@ function openProject(el){
   });
 
   modal.classList.add('active');
-
-  // Animation fade-in pour contenu
-  const content = modal.querySelector('.modal-content');
-  content.style.opacity=0;
-  setTimeout(()=>{content.style.opacity=1;},50);
 }
 
 // Fermer modal
 function closeProject(){
-  const modal = document.getElementById('projectModal');
-  modal.classList.remove('active');
-}
-
-// Dispersion style paintball
-function createPaintballEffect(el){
-  const count = 40;
-  const body = document.body;
-  for(let i=0;i<count;i++){
-    const dot = document.createElement('div');
-    dot.className='paintball';
-    dot.style.left = el.offsetLeft + el.offsetWidth/2 + 'px';
-    dot.style.top = el.offsetTop + el.offsetHeight/2 + 'px';
-    const x = (Math.random()-0.5)*400;
-    const y = (Math.random()-0.5)*400;
-    dot.style.transform = `translate(${x}px,${y}px)`;
-    body.appendChild(dot);
-    setTimeout(()=>dot.remove(),900);
-  }
+  document.getElementById('projectModal').classList.remove('active');
 }
 </script>
 </body>

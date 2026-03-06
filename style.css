@@ -101,18 +101,3 @@ header p{color:#ccc;margin-top:0.5rem;}
   transition:background 0.3s ease;
 }
 .contact-btn:hover{background:#343454;}
-
-/* Paintball */
-.paintball{
-  position:absolute;
-  width:12px;height:12px;
-  border-radius:50%;
-  background:radial-gradient(circle,#74ebd5,#acb6e5);
-  pointer-events:none;
-  animation:paintballMove 0.9s ease-out forwards;
-}
-@keyframes paintballMove{
-  0%{transform:translate(0,0) scale(0);}
-  50%{transform:scale(1.2);}
-  100%{opacity:0;}
-}

@@ -13,81 +13,113 @@
   <p>Vos projets numériques présentés avec style et interactivité</p>
 </header>
 
-<!-- Section Projets -->
 <section id="projets">
   <h2>Mes Projets</h2>
   <div class="grid">
-    <div class="projet" onclick="openProject(this)" data-title="Projet Alpha" data-desc="Principe du projet Alpha..." data-stats="12 utilisateurs actifs, 5 modules" data-orders="3 commandes">
-      <div class="placeholder">Titre du projet</div>
+    <div class="projet" 
+         onclick="openProject(this)" 
+         data-title="Alpha" 
+         data-price="49€" 
+         data-desc="Principe : Générateur avancé de mots de passe."
+         data-chart='[20,50,80,60,40]' 
+         data-commands="3 commandes">
+      <div class="placeholder">Projet Alpha</div>
     </div>
-    <div class="projet" onclick="openProject(this)" data-title="Projet Beta" data-desc="Principe du projet Beta..." data-stats="8 utilisateurs actifs, 2 modules" data-orders="5 commandes">
-      <div class="placeholder">Titre du projet</div>
-    </div>
-    <div class="projet" onclick="openProject(this)" data-title="Projet Gamma" data-desc="Principe du projet Gamma..." data-stats="15 utilisateurs actifs, 4 modules" data-orders="7 commandes">
-      <div class="placeholder">Titre du projet</div>
+    <div class="projet" 
+         onclick="openProject(this)" 
+         data-title="Beta" 
+         data-price="29€" 
+         data-desc="Principe : Analyseur statistique de mots de passe."
+         data-chart='[10,30,60,80,50]' 
+         data-commands="5 commandes">
+      <div class="placeholder">Projet Beta</div>
     </div>
   </div>
 </section>
 
-<!-- Overlay Projet -->
+<!-- Modal Projet -->
 <div id="projectModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeProject()">&times;</span>
-    <h2 id="modalTitle">Titre Projet</h2>
+    <div class="modal-header">
+      <h2 id="modalTitle">Titre</h2>
+      <span id="modalPrice">0€</span>
+    </div>
     <div class="modal-body">
       <div class="modal-desc">
         <h3>Principe / Description</h3>
         <p id="modalDesc"></p>
       </div>
       <div class="modal-stats">
-        <h3>Statistiques</h3>
-        <p id="modalStats"></p>
-        <p id="modalOrders"></p>
+        <h3>Graphique des stats</h3>
+        <canvas id="statsChart" width="300" height="200"></canvas>
+        <p id="modalCommands"></p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Contact -->
-<section id="contact">
-  <h2>Contact</h2>
-  <p>Pour me contacter et commander un projet :</p>
-  <p>Email : <a href="mailto:contact@codexlab.com">contact@codexlab.com</a></p>
-</section>
-
-<footer>
-  <p>© 2026 CodexLab</p>
-</footer>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Ouvrir modal projet
-function openProject(el) {
+// Ouvrir projet avec dispersion
+function openProject(el){
   const modal = document.getElementById('projectModal');
   document.getElementById('modalTitle').textContent = el.dataset.title;
+  document.getElementById('modalPrice').textContent = el.dataset.price;
   document.getElementById('modalDesc').textContent = el.dataset.desc;
-  document.getElementById('modalStats').textContent = el.dataset.stats;
-  document.getElementById('modalOrders').textContent = el.dataset.orders;
+  document.getElementById('modalCommands').textContent = el.dataset.commands;
+  
+  // Effet dispersion type paintball
+  createPaintballEffect(el);
+
+  // Remplir graphique
+  const data = JSON.parse(el.dataset.chart);
+  const ctx = document.getElementById('statsChart').getContext('2d');
+  if(window.myChart) window.myChart.destroy();
+  window.myChart = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:data.map((v,i)=>i+1),
+      datasets:[{
+        label:'Probabilité (%)',
+        data:data,
+        borderColor:'#74ebd5',
+        backgroundColor:'rgba(116,235,213,0.3)',
+        fill:true,
+        tension:0.3
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,max:100}}
+    }
+  });
+
   modal.classList.add('active');
 }
 
 // Fermer modal
-function closeProject() {
-  const modal = document.getElementById('projectModal');
-  modal.classList.remove('active');
+function closeProject(){
+  document.getElementById('projectModal').classList.remove('active');
 }
 
-// Animation stats (optionnelle)
-const stats = document.querySelectorAll('.stat h3');
-stats.forEach(stat => {
-  let count = 0;
-  const target = parseInt(stat.dataset.target) || 100;
-  const interval = setInterval(() => {
-    count++;
-    stat.textContent = count;
-    if(count >= target) clearInterval(interval);
-  }, 20);
-});
+// Dispersion style paintball
+function createPaintballEffect(el){
+  const count = 30;
+  const body = document.body;
+  for(let i=0;i<count;i++){
+    const dot = document.createElement('div');
+    dot.className='paintball';
+    dot.style.left = el.offsetLeft + el.offsetWidth/2 + 'px';
+    dot.style.top = el.offsetTop + el.offsetHeight/2 + 'px';
+    const x = (Math.random()-0.5)*300;
+    const y = (Math.random()-0.5)*300;
+    dot.style.transform = `translate(${x}px,${y}px)`;
+    body.appendChild(dot);
+    setTimeout(()=>dot.remove(),800);
+  }
+}
 </script>
-
 </body>
 </html>

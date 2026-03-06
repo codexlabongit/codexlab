@@ -35,25 +35,25 @@
     </section>
 
     <section id="stats">
-        <h2>Statistiques</h2>
-        <div class="stat-grid">
-            <div class="stat">
-                <h3>0</h3>
-                <p>Projets réalisés</p>
-            </div>
-            <div class="stat">
-                <h3>0</h3>
-                <p>Clients satisfaits</p>
-            </div>
-            <div class="stat">
-                <h3>0</h3>
-                <p>Lignes de code</p>
-            </div>
-            <div class="stat">
-                <h3>0</h3>
-                <p>Scripts distribués</p>
-            </div>
+     <h2>Statistiques des projets</h2>
+     <div class="stat-grid">
+        <div class="stat">
+            <h3>0</h3>
+            <p>Projets réalisés</p>
         </div>
+        <div class="stat">
+            <h3>0</h3>
+            <p>Projets en cours</p>
+        </div>
+        <div class="stat">
+            <h3>0</h3>
+            <p>Clients satisfaits</p>
+        </div>
+        <div class="stat">
+            <h3>0</h3>
+            <p>Scripts livrés</p>
+        </div>
+      </div>
     </section>
 
     <section id="contact">
@@ -84,6 +84,24 @@
                 if(count >= target) clearInterval(interval);
             }, 20);
         });
+        // Compteurs dynamiques pour les statistiques
+        function animateStats() {
+         const stats = document.querySelectorAll('#stats .stat h3');
+         stats.forEach(stat => {
+          let target = parseInt(stat.dataset.target) || 100; // valeur cible à définir
+          let count = 0;
+          const increment = Math.ceil(target / 100); // vitesse
+          const interval = setInterval(() => {
+            count += increment;
+            if(count > target) count = target;
+            stat.textContent = count;
+            if(count >= target) clearInterval(interval);
+         }, 20);
+         });
+        } 
+
+        // Définir data-target dans HTML pour chaque stat si besoin
+        document.addEventListener('DOMContentLoaded', animateStats);
     </script>
 </body>
 </html>

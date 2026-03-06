@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CodexLab - Showcase</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -20,104 +21,7 @@
          onclick="openProject(this)" 
          data-title="Alpha" 
          data-price="49€" 
-         data-desc="Principe : Générateur avancé de mots de passe.
-         body{
-  margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background:#f0f2f5;
-}
-header{
-  background:#1b1b2f;
-  color:white;
-  text-align:center;
-  padding:3rem 1rem;
-}
-header h1{font-size:3rem;margin:0;}
-header p{color:#ccc;margin-top:0.5rem;}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:2rem;
-  max-width:1000px;
-  margin:3rem auto;
-}
-.projet{
-  background:#fff;
-  border-radius:20px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.1);
-  cursor:pointer;
-  overflow:hidden;
-  position:relative;
-  transition:transform 0.5s ease;
-}
-.projet:hover{transform:translateY(-10px);}
-.placeholder{
-  height:200px;
-  background:linear-gradient(135deg,#74ebd5,#acb6e5);
-  display:flex;align-items:center;justify-content:center;
-  font-weight:bold;color:white;font-size:1.3rem;
-}
-
-.modal{
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.7);
-  display:flex; justify-content:center; align-items:center;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity 0.5s ease;
-  z-index:1000;
-}
-.modal.active{opacity:1; pointer-events:auto;}
-.modal-content{
-  background:#fff;
-  border-radius:20px;
-  width:90%;
-  max-width:900px;
-  padding:2rem;
-  transform:scale(0.8);
-  transition:transform 0.5s ease;
-}
-.modal.active .modal-content{transform:scale(1);}
-.modal .close{
-  position:absolute;
-  top:1rem; right:1.5rem;
-  font-size:2rem;
-  cursor:pointer;
-}
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:1rem;
-}
-.modal-header h2{margin:0;}
-.modal-body{
-  display:flex;
-  flex-wrap:wrap;
-  gap:2rem;
-}
-.modal-desc{flex:1 1 60%;}
-.modal-stats{flex:1 1 35%; background:#f0f2f5;padding:1rem;border-radius:15px;}
-.modal-stats p:last-child{text-align:right;font-weight:bold;}
-
-/* Paintball dots */
-.paintball{
-  position:absolute;
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:radial-gradient(circle,#74ebd5,#acb6e5);
-  pointer-events:none;
-  animation:paintballMove 0.8s ease-out forwards;
-}
-@keyframes paintballMove{
-  0%{transform:translate(0,0) scale(0);}
-  50%{transform:scale(1.2);}
-  100%{opacity:0;}
-}"
+         data-desc="Principe : Générateur avancé de mots de passe." 
          data-chart='[20,50,80,60,40]' 
          data-commands="3 commandes">
       <div class="placeholder">Projet Alpha</div>
@@ -126,7 +30,7 @@ header p{color:#ccc;margin-top:0.5rem;}
          onclick="openProject(this)" 
          data-title="Beta" 
          data-price="29€" 
-         data-desc="Principe : Analyseur statistique de mots de passe."
+         data-desc="Principe : Analyseur statistique de mots de passe." 
          data-chart='[10,30,60,80,50]' 
          data-commands="5 commandes">
       <div class="placeholder">Projet Beta</div>
@@ -148,15 +52,13 @@ header p{color:#ccc;margin-top:0.5rem;}
         <p id="modalDesc"></p>
       </div>
       <div class="modal-stats">
-        <h3>Graphique des stats</h3>
-        <canvas id="statsChart" width="300" height="200"></canvas>
+        <canvas id="statsChart" width="200" height="150"></canvas>
         <p id="modalCommands"></p>
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Ouvrir projet avec dispersion
 function openProject(el){
@@ -165,8 +67,7 @@ function openProject(el){
   document.getElementById('modalPrice').textContent = el.dataset.price;
   document.getElementById('modalDesc').textContent = el.dataset.desc;
   document.getElementById('modalCommands').textContent = el.dataset.commands;
-  
-  // Effet dispersion type paintball
+
   createPaintballEffect(el);
 
   // Remplir graphique
@@ -218,5 +119,6 @@ function createPaintballEffect(el){
   }
 }
 </script>
+
 </body>
 </html>

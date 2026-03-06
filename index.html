@@ -1,101 +1,93 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodexLab - Showcase</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodexLab - Showcase</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <header>
-        <h1>CodexLab</h1>
-        <p>Vos projets numériques présentés avec style et interactivité</p>
-    </header>
 
-    <!-- Section Projets -->
-    <section id="projets">
-        <h2>Mes Projets</h2>
-        <div class="grid">
-            <div class="projet" onclick="toggleDescription(this)">
-                <div class="placeholder">Titre du projet</div>
-                <div class="description">Description du projet ici...</div>
-            </div>
-            <div class="projet" onclick="toggleDescription(this)">
-                <div class="placeholder">Titre du projet</div>
-                <div class="description">Description du projet ici...</div>
-            </div>
-            <div class="projet" onclick="toggleDescription(this)">
-                <div class="placeholder">Titre du projet</div>
-                <div class="description">Description du projet ici...</div>
-            </div>
-            <div class="projet" onclick="toggleDescription(this)">
-                <div class="placeholder">Titre du projet</div>
-                <div class="description">Description du projet ici...</div>
-            </div>
-        </div>
-    </section>
+<header>
+  <h1>CodexLab</h1>
+  <p>Vos projets numériques présentés avec style et interactivité</p>
+</header>
 
-    <!-- Section Statistiques -->
-    <section id="stats">
-        <h2>Statistiques des projets</h2>
-        <div class="stat-grid">
-            <div class="stat">
-                <h3 data-target="12">0</h3>
-                <p>Projets réalisés</p>
-            </div>
-            <div class="stat">
-                <h3 data-target="3">0</h3>
-                <p>Projets en cours</p>
-            </div>
-            <div class="stat">
-                <h3 data-target="7">0</h3>
-                <p>Clients satisfaits</p>
-            </div>
-            <div class="stat">
-                <h3 data-target="25">0</h3>
-                <p>Scripts livrés</p>
-            </div>
-        </div>
-    </section>
+<!-- Section Projets -->
+<section id="projets">
+  <h2>Mes Projets</h2>
+  <div class="grid">
+    <div class="projet" onclick="openProject(this)" data-title="Projet Alpha" data-desc="Principe du projet Alpha..." data-stats="12 utilisateurs actifs, 5 modules" data-orders="3 commandes">
+      <div class="placeholder">Titre du projet</div>
+    </div>
+    <div class="projet" onclick="openProject(this)" data-title="Projet Beta" data-desc="Principe du projet Beta..." data-stats="8 utilisateurs actifs, 2 modules" data-orders="5 commandes">
+      <div class="placeholder">Titre du projet</div>
+    </div>
+    <div class="projet" onclick="openProject(this)" data-title="Projet Gamma" data-desc="Principe du projet Gamma..." data-stats="15 utilisateurs actifs, 4 modules" data-orders="7 commandes">
+      <div class="placeholder">Titre du projet</div>
+    </div>
+  </div>
+</section>
 
-    <!-- Section Contact -->
-    <section id="contact">
-        <h2>Contact</h2>
-        <p>Pour me contacter et commander un projet :</p>
-        <p>Email : <a href="mailto:contact@codexlab.com">contact@codexlab.com</a></p>
-    </section>
+<!-- Overlay Projet -->
+<div id="projectModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeProject()">&times;</span>
+    <h2 id="modalTitle">Titre Projet</h2>
+    <div class="modal-body">
+      <div class="modal-desc">
+        <h3>Principe / Description</h3>
+        <p id="modalDesc"></p>
+      </div>
+      <div class="modal-stats">
+        <h3>Statistiques</h3>
+        <p id="modalStats"></p>
+        <p id="modalOrders"></p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <footer>
-        <p>© 2026 CodexLab</p>
-    </footer>
+<!-- Contact -->
+<section id="contact">
+  <h2>Contact</h2>
+  <p>Pour me contacter et commander un projet :</p>
+  <p>Email : <a href="mailto:contact@codexlab.com">contact@codexlab.com</a></p>
+</section>
 
-    <script>
-        // Toggle description des projets
-        function toggleDescription(el) {
-            const desc = el.querySelector('.description');
-            desc.classList.toggle('active');
-        }
+<footer>
+  <p>© 2026 CodexLab</p>
+</footer>
 
-        // Animation compteur des stats
-        function animateStats() {
-            const stats = document.querySelectorAll('#stats .stat h3');
-            stats.forEach(stat => {
-                const target = parseInt(stat.dataset.target) || 100;
-                let count = 0;
-                const increment = Math.ceil(target / 100);
-                const interval = setInterval(() => {
-                    count += increment;
-                    if (count > target) count = target;
-                    stat.textContent = count;
-                    if (count >= target) clearInterval(interval);
-                }, 20);
-            });
-        }
+<script>
+// Ouvrir modal projet
+function openProject(el) {
+  const modal = document.getElementById('projectModal');
+  document.getElementById('modalTitle').textContent = el.dataset.title;
+  document.getElementById('modalDesc').textContent = el.dataset.desc;
+  document.getElementById('modalStats').textContent = el.dataset.stats;
+  document.getElementById('modalOrders').textContent = el.dataset.orders;
+  modal.classList.add('active');
+}
 
-        document.addEventListener('DOMContentLoaded', animateStats);
-    </script>
+// Fermer modal
+function closeProject() {
+  const modal = document.getElementById('projectModal');
+  modal.classList.remove('active');
+}
+
+// Animation stats (optionnelle)
+const stats = document.querySelectorAll('.stat h3');
+stats.forEach(stat => {
+  let count = 0;
+  const target = parseInt(stat.dataset.target) || 100;
+  const interval = setInterval(() => {
+    count++;
+    stat.textContent = count;
+    if(count >= target) clearInterval(interval);
+  }, 20);
+});
+</script>
+
 </body>
-
 </html>

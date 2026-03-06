@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodexLab - Showcase</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header>
         <h1>CodexLab</h1>
         <p>Vos projets numériques présentés avec style et interactivité</p>
     </header>
 
+    <!-- Section Projets -->
     <section id="projets">
         <h2>Mes Projets</h2>
         <div class="grid">
@@ -34,28 +37,30 @@
         </div>
     </section>
 
+    <!-- Section Statistiques -->
     <section id="stats">
-     <h2>Statistiques des projets</h2>
-     <div class="stat-grid">
-        <div class="stat">
-            <h3>0</h3>
-            <p>Projets réalisés</p>
+        <h2>Statistiques des projets</h2>
+        <div class="stat-grid">
+            <div class="stat">
+                <h3 data-target="12">0</h3>
+                <p>Projets réalisés</p>
+            </div>
+            <div class="stat">
+                <h3 data-target="3">0</h3>
+                <p>Projets en cours</p>
+            </div>
+            <div class="stat">
+                <h3 data-target="7">0</h3>
+                <p>Clients satisfaits</p>
+            </div>
+            <div class="stat">
+                <h3 data-target="25">0</h3>
+                <p>Scripts livrés</p>
+            </div>
         </div>
-        <div class="stat">
-            <h3>0</h3>
-            <p>Projets en cours</p>
-        </div>
-        <div class="stat">
-            <h3>0</h3>
-            <p>Clients satisfaits</p>
-        </div>
-        <div class="stat">
-            <h3>0</h3>
-            <p>Scripts livrés</p>
-        </div>
-      </div>
     </section>
 
+    <!-- Section Contact -->
     <section id="contact">
         <h2>Contact</h2>
         <p>Pour me contacter et commander un projet :</p>
@@ -67,41 +72,30 @@
     </footer>
 
     <script>
-        // Toggle description
+        // Toggle description des projets
         function toggleDescription(el) {
             const desc = el.querySelector('.description');
             desc.classList.toggle('active');
         }
 
-        // Animation pour stats (compteur simple)
-        const stats = document.querySelectorAll('.stat h3');
-        stats.forEach(stat => {
-            let count = 0;
-            const target = 100; // valeur par défaut
-            const interval = setInterval(() => {
-                count++;
-                stat.textContent = count;
-                if(count >= target) clearInterval(interval);
-            }, 20);
-        });
-        // Compteurs dynamiques pour les statistiques
+        // Animation compteur des stats
         function animateStats() {
-         const stats = document.querySelectorAll('#stats .stat h3');
-         stats.forEach(stat => {
-          let target = parseInt(stat.dataset.target) || 100; // valeur cible à définir
-          let count = 0;
-          const increment = Math.ceil(target / 100); // vitesse
-          const interval = setInterval(() => {
-            count += increment;
-            if(count > target) count = target;
-            stat.textContent = count;
-            if(count >= target) clearInterval(interval);
-         }, 20);
-         });
-        } 
+            const stats = document.querySelectorAll('#stats .stat h3');
+            stats.forEach(stat => {
+                const target = parseInt(stat.dataset.target) || 100;
+                let count = 0;
+                const increment = Math.ceil(target / 100);
+                const interval = setInterval(() => {
+                    count += increment;
+                    if (count > target) count = target;
+                    stat.textContent = count;
+                    if (count >= target) clearInterval(interval);
+                }, 20);
+            });
+        }
 
-        // Définir data-target dans HTML pour chaque stat si besoin
         document.addEventListener('DOMContentLoaded', animateStats);
     </script>
 </body>
+
 </html>

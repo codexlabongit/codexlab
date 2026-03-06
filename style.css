@@ -1,4 +1,4 @@
-/* --- Reset et style de base --- */
+/* Reset & Style de base */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -88,7 +88,7 @@ section {
     padding: 1rem;
 }
 
-/* --- Section Stats --- */
+/* --- Section Statistiques --- */
 #stats {
     background: #222;
     color: white;

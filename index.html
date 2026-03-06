@@ -21,7 +21,7 @@
          onclick="openProject(this)" 
          data-title="Alpha" 
          data-price="49€" 
-         data-desc="Principe : Générateur avancé de mots de passe.\n- Sécurisation optimale\n- Analyse statistique intégrée\n- Comparatif historique des performances"
+         data-desc="Principe : Générateur avancé de mots de passe.\n- Sécurisation optimale\n- Analyse statistique intégrée\n- Comparatif historique des performances\n- Aussi sur commande"
          data-chart='[20,50,80,60,40]' 
          data-commands="3 commandes">
       <div class="placeholder">Projet Alpha</div>
@@ -30,7 +30,7 @@
          onclick="openProject(this)" 
          data-title="Beta" 
          data-price="29€" 
-         data-desc="Principe : Analyseur statistique de mots de passe.\n- Evaluation des risques\n- Génération de rapports\n- Graphiques dynamiques"
+         data-desc="Principe : Analyseur statistique de mots de passe.\n- Evaluation des risques\n- Génération de rapports\n- Graphiques dynamiques\n- Aussi sur commande"
          data-chart='[10,30,60,80,50]' 
          data-commands="5 commandes">
       <div class="placeholder">Projet Beta</div>
@@ -57,7 +57,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <a href="mailto:contact@codexlab.com" class="contact-btn">📧 Envoyer un message</a>
+      <a href="mailto:contactcodexlab@proton.me" class="contact-btn">📧 Envoyer un message</a>
     </div>
   </div>
 </div>
@@ -68,7 +68,9 @@ function openProject(el){
   const modal = document.getElementById('projectModal');
   document.getElementById('modalTitle').textContent = el.dataset.title;
   document.getElementById('modalPrice').textContent = el.dataset.price;
-  document.getElementById('modalDesc').innerHTML = el.dataset.desc.replace(/\n/g,'<br>');
+  
+  // Remplacer \n par <br> pour multi-lignes
+  document.getElementById('modalDesc').innerHTML = el.dataset.desc.replace(/\n/g,'<br>');  
   document.getElementById('modalCommands').textContent = el.dataset.commands;
 
   createPaintballEffect(el);

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "rev_001",
+    "product_id": "prod_001",
+    "author": "Thomas Martin",
+    "role": "CTO @ Webflow Agency",
+    "rating": 5,
+    "text": "Le kit d'authentification m'a économisé 3 semaines de développement. La doc est exemplaire, le code est propre et ça marche du premier coup. Je recommande vivement!",
+    "date": "2025-01-12",
+    "initials": "TM",
+    "color": "#7c3aed"
+  },
+  {
+    "id": "rev_002",
+    "product_id": "prod_002",
+    "author": "Sophie Bernard",
+    "role": "Freelance Full-Stack",
+    "rating": 5,
+    "text": "Incroyable rapport qualité/prix. Intégration Stripe en 30 minutes, les webhooks fonctionnent parfaitement. La génération de factures PDF est un vrai plus.",
+    "date": "2025-01-28",
+    "initials": "SB",
+    "color": "#f97316"
+  },
+  {
+    "id": "rev_003",
+    "product_id": "prod_003",
+    "author": "Alexandre Leroux",
+    "role": "Indie Hacker",
+    "rating": 5,
+    "text": "CodexLab a transformé ma façon de travailler. Je peux maintenant livrer des projets en 2x moins de temps. Le code est production-ready.",
+    "date": "2025-02-05",
+    "initials": "AL",
+    "color": "#0ea5e9"
+  }
+]

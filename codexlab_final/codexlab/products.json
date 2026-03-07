@@ -8,13 +8,7 @@
     "price": null,
     "type": "custom",
     "description": "Vous avez un besoin spécifique ? Je développe votre solution sur mesure. Envoyez-moi un email en détaillant votre projet et je vous ferai une proposition personnalisée.",
-    "features": [
-      "Solution 100% personnalisée",
-      "Devis gratuit",
-      "Paiement par virement bancaire",
-      "Livraison après confirmation du virement",
-      "Communication directe"
-    ],
+    "features": ["Solution 100% personnalisée", "Devis gratuit", "Paiement par virement bancaire", "Livraison après confirmation du virement", "Communication directe"],
     "downloads": 0,
     "rating": null,
     "reviews_count": 0,

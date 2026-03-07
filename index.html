@@ -601,9 +601,9 @@ function renderStats() {
   const s = {...stats, total_products: realProductCount};
 
   animateCounter(document.getElementById('statProducts'), s.total_products, '');
-  animateCounter(document.getElementById('statDevs'), s.total_developers, '+');
+  //animateCounter(document.getElementById('statDevs'), s.total_developers, '+');
   animateCounter(document.getElementById('statSatisf'), s.satisfaction_pct, '%');
-  animateCounter(document.getElementById('statLangs'), s.languages_supported, '');
+  //animateCounter(document.getElementById('statLangs'), s.languages_supported, '');
 }
 
 function animateCounter(el, target, suffix) {

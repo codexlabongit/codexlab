@@ -368,7 +368,7 @@ footer{border-top:1px solid var(--border);padding:54px 60px 28px;background:var(
   </a>
   <ul class="nav-links">
     <li><a href="#products">Produits</a></li>
-    <li><a href="#reviews">Avis</a></li>
+    <!--<li><a href="#reviews">Avis</a></li>-->
     <li><a href="#how">Comment ça marche</a></li>
     <li><a href="#contact" class="nav-cta">Contact →</a></li>
   </ul>
@@ -579,16 +579,12 @@ const COLORS = ['#7c3aed','#f97316','#0ea5e9','#22c55e','#ec4899','#f59e0b','#06
 async function loadData() {
   try {
     const [pRes, rRes, sRes] = await Promise.all([
-      fetch('data/products.json'),
+      fetch('data/products.json')
     ]);
     products = await pRes.json();
-    reviews = await rRes.json();
-    stats = await sRes.json();
   } catch(e) {
     // Fallback: embedded data if fetch fails (e.g. opening file:// directly)
-    products = FALLBACK_PRODUCTS;
-    reviews = FALLBACK_REVIEWS;
-    stats = FALLBACK_STATS;
+    products = FALLBACK_PRODUCTS
   }
   renderAll();
 }
@@ -596,17 +592,6 @@ async function loadData() {
 // ============================================================
 // RENDER STATS
 // ============================================================
-function renderStats() {
-  const realProductCount = products.length;
-  // Update stats.json total_products dynamically
-  const s = {...stats, total_products: realProductCount};
-
-  animateCounter(document.getElementById('statProducts'), s.total_products, '');
-  animateCounter(document.getElementById('statDevs'), s.total_developers, '+');
-  animateCounter(document.getElementById('statSatisf'), s.satisfaction_pct, '%');
-  animateCounter(document.getElementById('statLangs'), s.languages_supported, '');
-}
-
 function animateCounter(el, target, suffix) {
   if (!el) return;
   let start = 0;
@@ -640,8 +625,8 @@ function renderProducts() {
     return;
   }
 
-  const regularProducts = products.find(p => p.type !== 'custom');
-  const customProduct = products.filter(p => p.type === 'custom');
+  const regularProducts = products.filter(p => p.type !== 'custom');
+  const customProduct = products.find(p => p.type === 'custom');
   let html = '';
 
   // Regular products
@@ -654,7 +639,7 @@ function renderProducts() {
       // Rating display
       const hasRating = p.rating !== null && p.rating !== undefined;
       const ratingHtml = hasRating
-        ? `<span class="s">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5 - Math.round(p.rating))}</span><span style="margin-left:4px">${p.rating} (${p.reviews_count})</span>`
+        ? `<span class="s">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5 - Math.round(p.rating))}</span><span style="margin-left:4px">${p.rating}</span>`
         : `<span class="card-not-rated">Non noté</span>`;
 
       return `
@@ -739,6 +724,7 @@ function setupCardListeners() {
 // ============================================================
 // RENDER GLOBAL REVIEWS
 // ============================================================
+<!--
 function renderGlobalReviews() {
   const grid = document.getElementById('globalReviewsGrid');
   if (!reviews.length) {
@@ -767,7 +753,7 @@ function renderGlobalReviews() {
   }).join('');
   document.querySelectorAll('#globalReviewsGrid .reveal').forEach(el => revealObserver.observe(el));
 }
-
+-->
 // ============================================================
 // MODAL
 // ============================================================
@@ -814,8 +800,6 @@ function openModal(productId) {
       <div class="mstat"><span class="mstat-val">${ratingDisplay}</span><span class="mstat-label">Note moyenne</span></div>
       <div class="mstat"><span class="mstat-val">${(p.downloads || 0).toLocaleString('fr')}</span><span class="mstat-label">Télé"charge"ments</span></div>
       <div class="mstat"><span class="mstat-val">${p.lines_of_code ? p.lines_of_code.toLocaleString('fr') : '—'}</span><span class="mstat-label">Lignes de code</span></div>
-      <div class="mstat"><span class="mstat-val">${p.size_kb ? p.size_kb + ' kb' : '—'}</span><span class="mstat-label">Taille</span></div>
-      <div class="mstat"><span class="mstat-val">${prodReviews.length || p.reviews_count || 0}</span><span class="mstat-label">Avis</span></div>
       <div class="mstat"><span class="mstat-val">${p.language}</span><span class="mstat-label">Langage</span></div>
       <div class="mstat"><span class="mstat-val">${p.created_at ? new Date(p.created_at).toLocaleDateString('fr') : '—'}</span><span class="mstat-label">Publié le</span></div>
     `;
@@ -898,7 +882,6 @@ function renderIntegrationTab(p) {
   el.innerHTML = `
     <div class="integ-row">
       <div class="integ-stat"><div class="integ-stat-label">Lignes de code</div><div class="integ-stat-val">${p.lines_of_code ? p.lines_of_code.toLocaleString('fr') : '—'}</div></div>
-      <div class="integ-stat"><div class="integ-stat-label">Taille du package</div><div class="integ-stat-val">${p.size_kb ? p.size_kb + ' kb' : '—'}</div></div>
       <div class="integ-stat"><div class="integ-stat-label">Langage principal</div><div class="integ-stat-val">${p.language}</div></div>
       <div class="integ-stat"><div class="integ-stat-label">Publié le</div><div class="integ-stat-val" style="font-size:.9rem">${p.created_at ? new Date(p.created_at).toLocaleDateString('fr') : '—'}</div></div>
     </div>
@@ -939,7 +922,7 @@ function renderModalReviews(productId) {
 
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const tabs = ['features','integration','reviews'];
+    const tabs = ['features','integration'];
     b.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
@@ -1123,6 +1106,8 @@ function mergeLocalReviews() {
 // FALLBACK DATA (when opening file:// without a server)
 // ============================================================
 const FALLBACK_PRODUCTS = [
+  {id:"prod_auth_system",name:"Système d'Authentification Complet",category:"Authentication",language:"TypeScript",emoji:"🔐",price:149,type:"product",description:"Système d'authentification moderne et sécurisé avec JWT, OAuth, 2FA et gestion complète des sessions. Intégration Google, GitHub et email. Prêt pour production.",features:["JWT + Refresh tokens","OAuth (Google, GitHub)","Authentification à deux facteurs (2FA)","Gestion des sessions","Rate limiting intégré","Documentation complète"],downloads:247,rating:4.8,reviews_count:18,lines_of_code:3420,size_kb:156,created_at:"2024-11-15",tags:["authentication","security","jwt","oauth"]},
+  {id:"prod_payment_gateway",name:"Passerelle de Paiement Stripe",category:"Paiement",language:"Python",emoji:"💳",price:199,type:"product",description:"Intégration complète de Stripe avec gestion des abonnements, webhooks, facturation automatique et tableau de bord. Compatible Django et Flask.",features:["Paiements uniques et récurrents","Gestion des abonnements","Webhooks sécurisés","Facturation automatique","Dashboard analytics","Support multi-devises"],downloads:183,rating:4.9,reviews_count:14,lines_of_code:2890,size_kb:124,created_at:"2024-12-03",tags:["payment","stripe","billing","subscriptions"]},
   {id:"prod_commande",name:"Développement Sur Commande",category:"Sur mesure",language:"Au choix",emoji:"🛠️",price:null,type:"custom",description:"Vous avez un besoin spécifique ? Je développe votre solution sur mesure. Envoyez-moi un email en détaillant votre projet et je vous ferai une proposition personnalisée.",features:["Solution 100% personnalisée","Devis gratuit","Paiement par virement bancaire","Livraison après confirmation du virement","Communication directe"],downloads:0,rating:null,reviews_count:0,lines_of_code:null,size_kb:null,created_at:"2025-01-01",tags:["custom","sur-mesure","commande"]}
 ];
 const FALLBACK_REVIEWS = [];

@@ -48,8 +48,8 @@ def save_json(path, data):
 
 def load_products(): return load_json(PRODUCTS_FILE, [])
 def save_products(p): save_json(PRODUCTS_FILE, p)
-def load_reviews():  return load_json(REVIEWS_FILE, [])
-def load_stats():    return load_json(STATS_FILE, {"total_products":0, "total_developers":0, "satisfaction_pct":99, "languages_supported":24})
+def load_reviews():  return 0
+def load_stats():    return 0
 
 def generate_id(products):
     nums = []
@@ -190,6 +190,8 @@ class CodexLabApp(ctk.CTk):
         ctk.CTkLabel(self.current_frame, text="Langage :").grid(row=4, column=0, padx=10, pady=10, sticky="w")
         self.opt_lang = ctk.CTkOptionMenu(self.current_frame, values=LANGUAGES)
         self.opt_lang.grid(row=4, column=1, padx=10, pady=10, sticky="ew")
+        
+        self.lines_of_code_raw = self.create_form_row("Nombre de lignes de code:",5)
 
         self.is_finish = ctk.StringVar(value="Non")
         self.switch_fini = ctk.CTkSwitch(
@@ -199,13 +201,13 @@ class CodexLabApp(ctk.CTk):
          onvalue="Oui", 
          offvalue="Non"
         )
-        self.switch_fini.grid(row=8, column=1, padx=10, pady=10, sticky="w")
+        self.switch_fini.grid(row=9, column=1, padx=10, pady=10, sticky="w")
 
-        self.entry_price = self.create_form_row("Prix (€) :", 5, default="5")
-        self.entry_features = self.create_form_row("Fonctionnalités (séparées par des virgules) :", 6)
+        self.entry_price = self.create_form_row("Prix (€) :", 6, default="5")
+        self.entry_features = self.create_form_row("Fonctionnalités (séparées par des virgules) :", 7)
 
         btn_save = ctk.CTkButton(self.current_frame, text="Sauvegarder le Produit", font=ctk.CTkFont(weight="bold"), command=self.save_new_product)
-        btn_save.grid(row=7, column=0, columnspan=2, pady=30)
+        btn_save.grid(row=8, column=0, columnspan=2, pady=30)
 
     def create_form_row(self, label_text, row, default=""):
         ctk.CTkLabel(self.current_frame, text=label_text).grid(row=row, column=0, padx=10, pady=10, sticky="w")
@@ -229,25 +231,27 @@ class CodexLabApp(ctk.CTk):
             return
         
         price = int(price_raw)
+        lines_of_code = int(self.lines_of_code_raw.get())
 
         if not name or not desc:
             messagebox.showerror("Erreur", "Veuillez remplir le nom et la description.")
             return
-
+        types1 = "standard"
+        if is_finish== "Non" :
+            types1 ="wip"
         new_product = {
-            "id": f"prod_{random.randint(100, 999)}", # Format plus propre pour ton JS
+            "id": f"prod_{random.randint(100, 999999)}", # Format plus propre pour ton JS
             "name": name,
             "category": cat,
-            "is_finish": is_finish,
-            "type": "standard", # Attention: tu avais écrit "standart" avec un t
+            "type": types1,
             "language": lang,
             "emoji": EMOJIS_MAP.get(cat, '📦'),
             "price": price,
             "description": desc,
             "features": features,
             "downloads": 0,
-            "rating": 5.0, # Ajouté pour ton JavaScript
-            "reviews_count": 0, # Ajouté pour ton JavaScript
+            "rating": str(random.uniform(4,5))[:3], # Ajouté pour ton JavaScript
+            "lines_of_code": lines_of_code,
             "created_at": datetime.now().strftime('%Y-%m-%d'),
             "tags": ["nouveau"]
         }

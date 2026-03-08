@@ -386,16 +386,16 @@ footer{border-top:1px solid var(--border);padding:54px 60px 28px;background:var(
     </div>
   </div>
 </section>
-
 <!-- STATS -->
 <div class="stats-bar" id="statsBar">
-  <div class="stat-item"><span class="stat-num" id="statProducts">—</span><span class="stat-label">Produits disponibles</span></div>
-  <div class="stat-divider"></div>
+  <!--<div class="stat-item"><span class="stat-num" id="statProducts">—</span><span class="stat-label">Produits disponibles</span></div>-->
+  <!--<div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-num" id="statDevs">—</span><span class="stat-label">Développeurs actifs</span></div>
   <div class="stat-divider"></div>
   <div class="stat-item"><span class="stat-num" id="statSatisf">—</span><span class="stat-label">Satisfaction client</span></div>
   <div class="stat-divider"></div>
+  <div class="stat-item"><span class="stat-num" id="statLangs">—</span><span class="stat-label">Langages supportés</span></div>-->
 </div>
-
 <!-- MARQUEE -->
 <div class="marquee-section">
   <div class="marquee-track" id="marqueeTrack">
@@ -601,9 +601,9 @@ function renderStats() {
   const s = {...stats, total_products: realProductCount};
 
   animateCounter(document.getElementById('statProducts'), s.total_products, '');
-  //animateCounter(document.getElementById('statDevs'), s.total_developers, '+');
+  animateCounter(document.getElementById('statDevs'), s.total_developers, '+');
   animateCounter(document.getElementById('statSatisf'), s.satisfaction_pct, '%');
-  //animateCounter(document.getElementById('statLangs'), s.languages_supported, '');
+  animateCounter(document.getElementById('statLangs'), s.languages_supported, '');
 }
 
 function animateCounter(el, target, suffix) {
@@ -818,7 +818,7 @@ function openModal(productId) {
     document.getElementById('mStats').innerHTML = `
       <div class="mstat"><span class="mstat-val">${p.type === 'wip' ? '<span style="color:#f97316">Bientôt</span>' : (p.price ? p.price + '€' : 'Sur devis')}</span><span class="mstat-label">Prix</span></div>
       <div class="mstat"><span class="mstat-val">${ratingDisplay}</span><span class="mstat-label">Note moyenne</span></div>
-      <div class="mstat"><span class="mstat-val">${(p.downloads || 0).toLocaleString('fr')}</span><span class="mstat-label">Téléchargements</span></div>
+      <div class="mstat"><span class="mstat-val">${(p.downloads || 0).toLocaleString('fr')}</span><span class="mstat-label">Télé"charge"ments</span></div>
       <div class="mstat"><span class="mstat-val">${p.lines_of_code ? p.lines_of_code.toLocaleString('fr') : '—'}</span><span class="mstat-label">Lignes de code</span></div>
       <div class="mstat"><span class="mstat-val">${p.size_kb ? p.size_kb + ' kb' : '—'}</span><span class="mstat-label">Taille</span></div>
       <div class="mstat"><span class="mstat-val">${prodReviews.length || p.reviews_count || 0}</span><span class="mstat-label">Avis</span></div>

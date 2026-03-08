@@ -640,14 +640,13 @@ function renderProducts() {
     return;
   }
 
-  const regularProducts = products.filter(p => p.type !== 'custom');
-  const customProduct = products.find(p => p.type === 'custom');
-
+  const regularProducts = products.find(p => p.type !== 'custom');
+  const customProduct = products.filter(p => p.type === 'custom');
+  console.log(regularProducts,customProduct)
   let html = '';
 
   // Regular products
   if (regularProducts.length) {
-    console.log("ta soeur")
     html += regularProducts.map((p, i) => {
       const snippet = CODE_SNIPPETS[p.language] || DEFAULT_SNIPPET;
       const featured = i === 0 ? 'featured' : '';

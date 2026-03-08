@@ -657,18 +657,12 @@ function renderProducts() {
         ? `<span class="s">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5 - Math.round(p.rating))}</span><span style="margin-left:4px">${p.rating} (${p.reviews_count})</span>`
         : `<span class="card-not-rated">Non noté</span>`;
 
-      // WIP badge
-      const wipHtml = p.type === 'wip'
-        ? `<div class="card-wip"><span class="card-wip-dot"></span>En développement${p.release_date ? ' · ' + p.release_date : ''}</div>`
-        : '';
-
       return `
       <div class="product-card ${featured} reveal ${delay}" onclick="openModal('${p.id}')">
         <div class="card-preview">
           <div class="code-preview">${snippet}</div>
           <div class="preview-overlay"></div>
           <span class="card-lang">${p.language}</span>
-          ${wipHtml}
         </div>
         <div class="card-body">
           <div class="card-cat">${p.emoji} ${p.category}</div>

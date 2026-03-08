@@ -580,8 +580,6 @@ async function loadData() {
   try {
     const [pRes, rRes, sRes] = await Promise.all([
       fetch('data/products.json'),
-      fetch('data/reviews.json'),
-      fetch('data/stats.json')
     ]);
     products = await pRes.json();
     reviews = await rRes.json();
@@ -649,6 +647,7 @@ function renderProducts() {
 
   // Regular products
   if (regularProducts.length) {
+    console.log("ta soeur")
     html += regularProducts.map((p, i) => {
       const snippet = CODE_SNIPPETS[p.language] || DEFAULT_SNIPPET;
       const featured = i === 0 ? 'featured' : '';

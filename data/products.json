@@ -1,5 +1,5 @@
 [
-  {
+ {
     "id": "prod_commande",
     "name": "Développement Sur Commande",
     "category": "Sur mesure",
@@ -29,19 +29,24 @@
     ]
   },
   {
-    "id": 1300199128,
-    "name": "générateur de mots de passse",
-    "category": "Security",
+    "id": "prod_353",
+    "name": "générateur de mots de passe",
+    "category": "Dashboard",
     "is_finish": "Oui",
-    "language": "Python",
-    "emoji": "🛡️",
-    "price": 15,
+    "language": "JavaScript",
+    "emoji": "📊",
+    "price": 51,
+    "type": "standard",
     "description": "neuille",
     "features": [
-      "Sécurité",
-      "beauté"
+      "t'est beau",
+      "sexy"
     ],
     "downloads": 0,
+    "rating": 5.0,
+    "reviews_count": 0,
+    "lines_of_code": null,
+    "size_kb": null,
     "created_at": "2026-03-08",
     "tags": [
       "nouveau"

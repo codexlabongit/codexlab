@@ -52,7 +52,15 @@ def load_reviews():  return load_json(REVIEWS_FILE, [])
 def load_stats():    return load_json(STATS_FILE, {"total_products":0, "total_developers":0, "satisfaction_pct":99, "languages_supported":24})
 
 def generate_id(products):
-    nums = [int(p['id'].split('_')[1]) for p in products if '_' in p.get('id','')]
+    nums = []
+    for p in products:
+        # On vérifie que p est bien un dictionnaire avant d'essayer d'accéder à 'id'
+        if isinstance(p, dict) and 'id' in p and isinstance(p['id'], str):
+            if '_' in p['id']:
+                try:
+                    nums.append(int(p['id'].split('_')[1]))
+                except (ValueError, IndexError):
+                    continue
     next_num = max(nums) + 1 if nums else 1
     return f"prod_{next_num:03d}"
 
@@ -124,8 +132,9 @@ class CodexLabApp(ctk.CTk):
         stats_frame.pack(fill="x", pady=10)
 
         # On utilise "or 0" pour forcer la valeur à 0 si le champ est à null/None
-        total_dl = sum((p.get('downloads') or 0) for p in self.products)
-        revenue = sum((p.get('price') or 0) * (p.get('downloads') or 0) for p in self.products)
+        # On vérifie que p est un dictionnaire avant de faire .get()
+        total_dl = sum((p.get('downloads') or 0) for p in self.products if isinstance(p, dict))
+        revenue = sum((p.get('price') or 0) * (p.get('downloads') or 0) for p in self.products if isinstance(p, dict))
 
         self.create_stat_card(stats_frame, "Total Produits", len(self.products), "📦").pack(side="left", expand=True, padx=5)
         self.create_stat_card(stats_frame, "Téléchargements", f"{total_dl:,}", "⬇️").pack(side="left", expand=True, padx=5)
@@ -137,8 +146,6 @@ class CodexLabApp(ctk.CTk):
         ctk.CTkLabel(card, text=str(value), font=ctk.CTkFont(size=24, weight="bold"), text_color="#1f6aa5").pack()
         ctk.CTkLabel(card, text=title, font=ctk.CTkFont(size=14)).pack(pady=(0, 15))
         return card
-
-    # --- VUE : LISTE DES PRODUITS ---
     def show_products(self):
         self.clear_main_frame()
         self.products = load_products()
@@ -208,29 +215,39 @@ class CodexLabApp(ctk.CTk):
         return entry
 
     def save_new_product(self):
-        name = self.entry_name.get()
-        desc = self.entry_desc.get()
+        name = self.entry_name.get().strip()
+        desc = self.entry_desc.get().strip()
         cat = self.opt_category.get()
         lang = self.opt_lang.get()
         is_finish = self.is_finish.get()
-        price_str = int(self.entry_price.get())
+        price_raw = self.entry_price.get().strip()
         features = [f.strip() for f in self.entry_features.get().split(',') if f.strip()]
 
-        if not name or not desc or not str(price_str).isdigit():
-            messagebox.showerror("Erreur", "Veuillez remplir correctement les champs obligatoires (le prix doit être un nombre).")
+        # Validation du prix AVANT conversion
+        if not price_raw.isdigit():
+            messagebox.showerror("Erreur", "Le prix doit être un nombre entier.")
+            return
+        
+        price = int(price_raw)
+
+        if not name or not desc:
+            messagebox.showerror("Erreur", "Veuillez remplir le nom et la description.")
             return
 
         new_product = {
-            "id": random.randint(0,10**10),
+            "id": f"prod_{random.randint(100, 999)}", # Format plus propre pour ton JS
             "name": name,
             "category": cat,
-            "is_finish":is_finish,
+            "is_finish": is_finish,
+            "type": "standard", # Attention: tu avais écrit "standart" avec un t
             "language": lang,
             "emoji": EMOJIS_MAP.get(cat, '📦'),
-            "price": int(price_str),
+            "price": price,
             "description": desc,
             "features": features,
             "downloads": 0,
+            "rating": 5.0, # Ajouté pour ton JavaScript
+            "reviews_count": 0, # Ajouté pour ton JavaScript
             "created_at": datetime.now().strftime('%Y-%m-%d'),
             "tags": ["nouveau"]
         }

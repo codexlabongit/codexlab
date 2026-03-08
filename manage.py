@@ -1,34 +1,22 @@
-#!/usr/bin/env python3
-"""
-╔═══════════════════════════════════════════════════════╗
-║          CodexLab — Gestionnaire de produits          ║
-║  Utilisez ce script pour ajouter/gérer vos produits   ║
-╚═══════════════════════════════════════════════════════╝
-
-USAGE:
-  python manage.py add        → Ajouter un nouveau produit (interactif)
-  python manage.py list       → Lister tous les produits
-  python manage.py delete     → Supprimer un produit
-  python manage.py edit       → Modifier un produit existant
-  python manage.py stats      → Voir les statistiques du site
-  python manage.py reviews    → Voir tous les avis clients
-  python manage.py export     → Exporter les produits en CSV
-  python manage.py serve      → Lancer un serveur local (ouvre le site)
-"""
-
 import json
-import os
-import sys
 import csv
+import threading
 import http.server
 import webbrowser
-import threading
-import re
 from datetime import datetime
 from pathlib import Path
+import customtkinter as ctk
+from tkinter import messagebox
+import random
 
 # ============================================================
-# PATHS
+# CONFIGURATION CUSTOMTKINTER
+# ============================================================
+ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+ctk.set_default_color_theme("blue")  # Thèmes: "blue", "green", "dark-blue"
+
+# ============================================================
+# PATHS ET DONNÉES (Identiques à ton script)
 # ============================================================
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
@@ -36,42 +24,19 @@ PRODUCTS_FILE = DATA_DIR / "products.json"
 REVIEWS_FILE = DATA_DIR / "reviews.json"
 STATS_FILE = DATA_DIR / "stats.json"
 
-# ============================================================
-# COLORS FOR TERMINAL
-# ============================================================
-class C:
-    RESET   = '\033[0m'
-    BOLD    = '\033[1m'
-    GREEN   = '\033[92m'
-    CYAN    = '\033[96m'
-    YELLOW  = '\033[93m'
-    RED     = '\033[91m'
-    MAGENTA = '\033[95m'
-    BLUE    = '\033[94m'
-    DIM     = '\033[2m'
-    ACCENT  = '\033[38;5;86m'   # Teal like --accent
+LANGUAGES = ['TypeScript', 'Python', 'JavaScript', 'Go', 'PHP', 'Rust', 'Java', 'C#', 'Ruby', 'Swift', 'Kotlin', 'Dart', 'C++', 'Other']
+CATEGORIES = ['Authentication', 'Paiement', 'Dashboard', 'API', 'IA & ChatBot', 'Email', 'Storage', 'DevOps', 'UI Components', 'Bot/Scraper', 'Security', 'Other']
+EMOJIS_MAP = {
+    'Authentication':'🔐', 'Paiement':'💳', 'Dashboard':'📊', 'API':'⚡',
+    'IA & ChatBot':'🤖', 'Email':'📧', 'Storage':'💾', 'DevOps':'🐳',
+    'UI Components':'🎨', 'Bot/Scraper':'🕷️', 'Security':'🛡️', 'Other':'📦'
+}
 
-def banner():
-    print(f"""
-{C.ACCENT}╔══════════════════════════════════════════════════════╗
-║   {C.BOLD}CodexLab — Gestionnaire de Produits{C.RESET}{C.ACCENT}              ║
-║   {C.DIM}Marketplace de code premium{C.RESET}{C.ACCENT}                       ║
-╚══════════════════════════════════════════════════════╝{C.RESET}
-""")
-
-def success(msg): print(f"  {C.GREEN}✓{C.RESET}  {msg}")
-def error(msg):   print(f"  {C.RED}✗{C.RESET}  {msg}")
-def info(msg):    print(f"  {C.CYAN}→{C.RESET}  {msg}")
-def warn(msg):    print(f"  {C.YELLOW}⚠{C.RESET}  {msg}")
-def sep():        print(f"  {C.DIM}{'─' * 52}{C.RESET}")
-
-# ============================================================
-# DATA HELPERS
-# ============================================================
 def load_json(path, default):
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        save_json(path, default)
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(default, f, ensure_ascii=False, indent=2)
         return default
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
@@ -84,403 +49,228 @@ def save_json(path, data):
 def load_products(): return load_json(PRODUCTS_FILE, [])
 def save_products(p): save_json(PRODUCTS_FILE, p)
 def load_reviews():  return load_json(REVIEWS_FILE, [])
-def load_stats():    return load_json(STATS_FILE, {"total_products":0,"total_developers":0,"satisfaction_pct":99,"languages_supported":24})
-def save_stats(s):   save_json(STATS_FILE, s)
+def load_stats():    return load_json(STATS_FILE, {"total_products":0, "total_developers":0, "satisfaction_pct":99, "languages_supported":24})
 
 def generate_id(products):
     nums = [int(p['id'].split('_')[1]) for p in products if '_' in p.get('id','')]
     next_num = max(nums) + 1 if nums else 1
     return f"prod_{next_num:03d}"
 
-def update_stats(products):
-    s = load_stats()
-    s['total_products'] = len(products)
-    s['last_updated'] = datetime.now().strftime('%Y-%m-%d')
-    save_stats(s)
-
 # ============================================================
-# PROMPT HELPERS
+# INTERFACE GRAPHIQUE
 # ============================================================
-def ask(prompt, default=None, required=True):
-    disp = f"{C.CYAN}{prompt}{C.RESET}"
-    if default: disp += f" {C.DIM}[{default}]{C.RESET}"
-    disp += " : "
-    while True:
-        val = input(disp).strip()
-        if not val and default:
-            return default
-        if val or not required:
-            return val
-        warn("Ce champ est requis.")
+class CodexLabApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-def ask_int(prompt, default=None, min_val=0, max_val=99999):
-    while True:
-        val = ask(prompt, str(default) if default is not None else None)
-        try:
-            v = int(val)
-            if min_val <= v <= max_val:
-                return v
-            warn(f"Entrez un nombre entre {min_val} et {max_val}.")
-        except ValueError:
-            warn("Entrez un nombre entier valide.")
+        self.title("CodexLab — Gestionnaire de Produits")
+        self.geometry("900x600")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
-def ask_float(prompt, default=None, min_val=0, max_val=99999):
-    while True:
-        val = ask(prompt, str(default) if default is not None else None)
-        try:
-            v = float(val)
-            if min_val <= v <= max_val:
-                return v
-            warn(f"Entrez un nombre entre {min_val} et {max_val}.")
-        except ValueError:
-            warn("Entrez un nombre valide (ex: 4.8).")
+        # --- Données ---
+        self.products = load_products()
+        self.reviews = load_reviews()
 
-def ask_list(prompt, default=None):
-    info(f"Entrez les éléments séparés par des virgules.")
-    val = ask(prompt, default)
-    return [x.strip() for x in val.split(',') if x.strip()]
+        # --- Sidebar ---
+        self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(6, weight=1)
 
-def ask_choice(prompt, choices, default=None):
-    for i, c in enumerate(choices, 1):
-        print(f"    {C.DIM}{i}.{C.RESET} {c}")
-    while True:
-        idx = ask(f"{prompt} (1-{len(choices)})", str(choices.index(default)+1) if default in choices else None)
-        try:
-            v = int(idx)
-            if 1 <= v <= len(choices):
-                return choices[v-1]
-            warn(f"Entrez un nombre entre 1 et {len(choices)}.")
-        except ValueError:
-            # Check if they typed the value directly
-            if idx in choices: return idx
-            warn("Choix invalide.")
+        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="CodexLab", font=ctk.CTkFont(size=24, weight="bold"))
+        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 30))
 
-# ============================================================
-# COMMANDS
-# ============================================================
-def cmd_add():
-    banner()
-    print(f"  {C.BOLD}Ajouter un nouveau produit{C.RESET}\n")
-    sep()
+        self.btn_dashboard = ctk.CTkButton(self.sidebar_frame, text="📊 Dashboard", command=self.show_dashboard)
+        self.btn_dashboard.grid(row=1, column=0, padx=20, pady=10)
 
-    products = load_products()
+        self.btn_list = ctk.CTkButton(self.sidebar_frame, text="📦 Produits", command=self.show_products)
+        self.btn_list.grid(row=2, column=0, padx=20, pady=10)
 
-    LANGUAGES = ['TypeScript','Python','JavaScript','Go','PHP','Rust','Java','C#','Ruby','Swift','Kotlin','Dart','C++','Other']
-    CATEGORIES = ['Authentication','Paiement','Dashboard','API','IA & ChatBot','Email','Storage','DevOps','UI Components','Bot/Scraper','Security','Other']
-    EMOJIS_MAP = {
-        'Authentication':'🔐','Paiement':'💳','Dashboard':'📊','API':'⚡',
-        'IA & ChatBot':'🤖','Email':'📧','Storage':'💾','DevOps':'🐳',
-        'UI Components':'🎨','Bot/Scraper':'🕷️','Security':'🛡️','Other':'📦'
-    }
+        self.btn_add = ctk.CTkButton(self.sidebar_frame, text="➕ Ajouter", command=self.show_add_form)
+        self.btn_add.grid(row=3, column=0, padx=20, pady=10)
 
-    print(f"\n  {C.BOLD}Informations générales{C.RESET}")
-    name        = ask("Nom du produit", required=True)
-    description = ask("Description complète", required=True)
+        self.btn_export = ctk.CTkButton(self.sidebar_frame, text="📥 Exporter CSV", command=self.export_csv, fg_color="transparent", border_width=2)
+        self.btn_export.grid(row=4, column=0, padx=20, pady=10)
 
-    print(f"\n  {C.BOLD}Catégorie et langage{C.RESET}")
-    category    = ask_choice("Catégorie", CATEGORIES)
-    language    = ask_choice("Langage principal", LANGUAGES)
-    emoji       = ask("Emoji (laisser vide = auto)", required=False) or EMOJIS_MAP.get(category, '📦')
+        self.btn_serve = ctk.CTkButton(self.sidebar_frame, text="🌐 Lancer Serveur", command=self.start_server, fg_color="#28a745", hover_color="#218838")
+        self.btn_serve.grid(row=5, column=0, padx=20, pady=10)
 
-    print(f"\n  {C.BOLD}Prix et statistiques{C.RESET}")
-    price       = ask_int("Prix en € (entier)", default=29, min_val=1)
-    downloads   = ask_int("Nombre de téléchargements initiaux", default=0)
-    rating      = ask_float("Note initiale (0-5)", default=5.0, min_val=0, max_val=5)
-    reviews_count = ask_int("Nombre d'avis initial", default=0)
-    lines_of_code = ask_int("Lignes de code (optionnel)", default=0)
-    size_kb     = ask_int("Taille en KB (optionnel)", default=0)
+        # --- Main Content Frame ---
+        self.main_frame = ctk.CTkFrame(self, corner_radius=10, fg_color="transparent")
+        self.main_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
 
-    print(f"\n  {C.BOLD}Fonctionnalités{C.RESET}")
-    features    = ask_list("Fonctionnalités (séparées par des virgules)", default="Feature 1, Feature 2")
+        self.current_frame = None
+        self.show_dashboard()
 
-    print(f"\n  {C.BOLD}Tags{C.RESET}")
-    tags        = ask_list("Tags (séparés par des virgules)", default="code, premium")
+    def clear_main_frame(self):
+        if self.current_frame is not None:
+            self.current_frame.destroy()
 
-    product = {
-        "id"           : generate_id(products),
-        "name"         : name,
-        "category"     : category,
-        "language"     : language,
-        "emoji"        : emoji,
-        "price"        : price,
-        "description"  : description,
-        "features"     : features,
-        "downloads"    : downloads,
-        "rating"       : round(rating, 1),
-        "reviews_count": reviews_count,
-        "lines_of_code": lines_of_code if lines_of_code > 0 else None,
-        "size_kb"      : size_kb if size_kb > 0 else None,
-        "created_at"   : datetime.now().strftime('%Y-%m-%d'),
-        "tags"         : [t.lower().strip() for t in tags]
-    }
+    # --- VUE : DASHBOARD ---
+    def show_dashboard(self):
+        self.clear_main_frame()
+        self.products = load_products() # Rafraîchir les données
+        
+        self.current_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
 
-    print(f"\n  {C.BOLD}Récapitulatif{C.RESET}")
-    sep()
-    print(f"  {C.CYAN}ID          :{C.RESET} {product['id']}")
-    print(f"  {C.CYAN}Nom         :{C.RESET} {product['name']}")
-    print(f"  {C.CYAN}Catégorie   :{C.RESET} {product['emoji']} {product['category']}")
-    print(f"  {C.CYAN}Langage     :{C.RESET} {product['language']}")
-    print(f"  {C.CYAN}Prix        :{C.RESET} {C.ACCENT}{product['price']}€{C.RESET}")
-    print(f"  {C.CYAN}Desc.       :{C.RESET} {product['description'][:60]}...")
-    print(f"  {C.CYAN}Fonctions   :{C.RESET} {', '.join(product['features'][:3])}...")
-    sep()
+        title = ctk.CTkLabel(self.current_frame, text="Dashboard Statistiques", font=ctk.CTkFont(size=28, weight="bold"))
+        title.pack(pady=(0, 20), anchor="w")
 
-    confirm = ask("Confirmer l'ajout ? (o/n)", default="o")
-    if confirm.lower() in ('o', 'oui', 'y', 'yes'):
-        products.append(product)
-        save_products(products)
-        update_stats(products)
-        success(f"Produit '{name}' ajouté avec l'ID {product['id']}")
-        info(f"Total produits : {len(products)}")
-    else:
-        warn("Ajout annulé.")
+        # Cartes de stats
+        stats_frame = ctk.CTkFrame(self.current_frame, fg_color="transparent")
+        stats_frame.pack(fill="x", pady=10)
 
-def cmd_list():
-    banner()
-    products = load_products()
-    reviews  = load_reviews()
+        # On utilise "or 0" pour forcer la valeur à 0 si le champ est à null/None
+        total_dl = sum((p.get('downloads') or 0) for p in self.products)
+        revenue = sum((p.get('price') or 0) * (p.get('downloads') or 0) for p in self.products)
 
-    if not products:
-        warn("Aucun produit dans la base.")
-        return
+        self.create_stat_card(stats_frame, "Total Produits", len(self.products), "📦").pack(side="left", expand=True, padx=5)
+        self.create_stat_card(stats_frame, "Téléchargements", f"{total_dl:,}", "⬇️").pack(side="left", expand=True, padx=5)
+        self.create_stat_card(stats_frame, "Revenu Estimé", f"{revenue:,.0f} €", "💰").pack(side="left", expand=True, padx=5)
 
-    print(f"  {C.BOLD}Liste des produits ({len(products)}){C.RESET}\n")
-    sep()
+    def create_stat_card(self, parent, title, value, icon):
+        card = ctk.CTkFrame(parent, corner_radius=15)
+        ctk.CTkLabel(card, text=icon, font=ctk.CTkFont(size=40)).pack(pady=(15, 5))
+        ctk.CTkLabel(card, text=str(value), font=ctk.CTkFont(size=24, weight="bold"), text_color="#1f6aa5").pack()
+        ctk.CTkLabel(card, text=title, font=ctk.CTkFont(size=14)).pack(pady=(0, 15))
+        return card
 
-    for p in products:
-        prod_reviews = [r for r in reviews if r.get('product_id') == p['id']]
-        avg = round(sum(r['rating'] for r in prod_reviews) / len(prod_reviews), 1) if prod_reviews else p.get('rating', '—')
-        print(f"\n  {C.ACCENT}{p['id']}{C.RESET}  {C.BOLD}{p.get('emoji','')} {p['name']}{C.RESET}")
-        print(f"      {C.DIM}Prix:{C.RESET} {C.GREEN}{p['price']}€{C.RESET}   "
-              f"{C.DIM}Lang:{C.RESET} {p['language']}   "
-              f"{C.DIM}Catégorie:{C.RESET} {p['category']}")
-        print(f"      {C.DIM}Note:{C.RESET} {avg}★   "
-              f"{C.DIM}DL:{C.RESET} {p.get('downloads',0)}   "
-              f"{C.DIM}Avis:{C.RESET} {len(prod_reviews)}/{p.get('reviews_count',0)}   "
-              f"{C.DIM}Ajouté:{C.RESET} {p.get('created_at','—')}")
-        print(f"      {C.DIM}{p['description'][:70]}...{C.RESET}")
+    # --- VUE : LISTE DES PRODUITS ---
+    def show_products(self):
+        self.clear_main_frame()
+        self.products = load_products()
 
-    sep()
-    print(f"\n  {C.DIM}Fichier : {PRODUCTS_FILE}{C.RESET}")
+        self.current_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+        
+        title = ctk.CTkLabel(self.current_frame, text="Liste des Produits", font=ctk.CTkFont(size=28, weight="bold"))
+        title.pack(pady=(0, 20), anchor="w")
 
-def cmd_delete():
-    banner()
-    products = load_products()
-    if not products:
-        warn("Aucun produit à supprimer.")
-        return
+        scrollable_frame = ctk.CTkScrollableFrame(self.current_frame)
+        scrollable_frame.pack(fill="both", expand=True)
 
-    print(f"  {C.BOLD}Supprimer un produit{C.RESET}\n")
-    for i, p in enumerate(products, 1):
-        print(f"  {C.DIM}{i}.{C.RESET} [{p['id']}] {p.get('emoji','')} {p['name']} — {C.GREEN}{p['price']}€{C.RESET}")
+        for p in self.products:
+            card = ctk.CTkFrame(scrollable_frame, corner_radius=10)
+            card.pack(fill="x", pady=5, padx=5)
+            
+            header = ctk.CTkLabel(card, text=f"{p.get('emoji','')} {p['name']} ({p['id']})", font=ctk.CTkFont(size=16, weight="bold"))
+            header.pack(anchor="w", padx=10, pady=(10, 0))
+            
+            info = ctk.CTkLabel(card, text=f"Prix: {p['price']}€ | Langage: {p['language']} | Catégorie: {p['category']} | Téléchargements: {p.get('downloads',0)}", text_color="gray")
+            info.pack(anchor="w", padx=10, pady=(0, 10))
 
-    pid = ask("\nID du produit à supprimer (ex: prod_001)", required=True)
-    prod = next((p for p in products if p['id'] == pid), None)
-    if not prod:
-        error(f"Produit '{pid}' introuvable.")
-        return
+    # --- VUE : AJOUTER UN PRODUIT ---
+    def show_add_form(self):
+        self.clear_main_frame()
+        self.current_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+        self.current_frame.grid_columnconfigure(1, weight=1)
 
-    print(f"\n  {C.RED}Supprimer :{C.RESET} {prod.get('emoji','')} {prod['name']}")
-    confirm = ask("Confirmer la suppression ? (o/n)", default="n")
-    if confirm.lower() in ('o', 'oui', 'y', 'yes'):
-        products = [p for p in products if p['id'] != pid]
-        save_products(products)
-        update_stats(products)
-        success(f"Produit '{pid}' supprimé.")
-    else:
-        warn("Suppression annulée.")
+        title = ctk.CTkLabel(self.current_frame, text="Ajouter un Produit", font=ctk.CTkFont(size=28, weight="bold"))
+        title.grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
 
-def cmd_edit():
-    banner()
-    products = load_products()
-    if not products:
-        warn("Aucun produit à modifier.")
-        return
+        # Champs du formulaire
+        self.entry_name = self.create_form_row("Nom du produit :", 1)
+        self.entry_desc = self.create_form_row("Description :", 2)
+        
+        ctk.CTkLabel(self.current_frame, text="Catégorie :").grid(row=3, column=0, padx=10, pady=10, sticky="w")
+        self.opt_category = ctk.CTkOptionMenu(self.current_frame, values=CATEGORIES)
+        self.opt_category.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
 
-    print(f"  {C.BOLD}Modifier un produit{C.RESET}\n")
-    for i, p in enumerate(products, 1):
-        print(f"  {C.DIM}{i}.{C.RESET} [{p['id']}] {p.get('emoji','')} {p['name']} — {C.GREEN}{p['price']}€{C.RESET}")
+        ctk.CTkLabel(self.current_frame, text="Langage :").grid(row=4, column=0, padx=10, pady=10, sticky="w")
+        self.opt_lang = ctk.CTkOptionMenu(self.current_frame, values=LANGUAGES)
+        self.opt_lang.grid(row=4, column=1, padx=10, pady=10, sticky="ew")
 
-    pid = ask("\nID du produit à modifier (ex: prod_001)", required=True)
-    idx = next((i for i, p in enumerate(products) if p['id'] == pid), None)
-    if idx is None:
-        error(f"Produit '{pid}' introuvable.")
-        return
+        self.is_finish = ctk.StringVar(value="Non")
+        self.switch_fini = ctk.CTkSwitch(
+         self.current_frame, 
+         text="Produit Fini ?", 
+         variable=self.is_finish, 
+         onvalue="Oui", 
+         offvalue="Non"
+        )
+        self.switch_fini.grid(row=8, column=1, padx=10, pady=10, sticky="w")
 
-    p = products[idx]
-    print(f"\n  {C.BOLD}Modification de : {p.get('emoji','')} {p['name']}{C.RESET}")
-    info("Laissez vide pour conserver la valeur actuelle.\n")
+        self.entry_price = self.create_form_row("Prix (€) :", 5, default="5")
+        self.entry_features = self.create_form_row("Fonctionnalités (séparées par des virgules) :", 6)
 
-    fields = [
-        ('name', 'Nom', 'str'),
-        ('description', 'Description', 'str'),
-        ('price', 'Prix €', 'int'),
-        ('rating', 'Note (0-5)', 'float'),
-        ('downloads', 'Téléchargements', 'int'),
-        ('reviews_count', 'Nombre d\'avis', 'int'),
-        ('lines_of_code', 'Lignes de code', 'int'),
-        ('size_kb', 'Taille KB', 'int'),
-        ('language', 'Langage', 'str'),
-        ('category', 'Catégorie', 'str'),
-        ('emoji', 'Emoji', 'str'),
-    ]
+        btn_save = ctk.CTkButton(self.current_frame, text="Sauvegarder le Produit", font=ctk.CTkFont(weight="bold"), command=self.save_new_product)
+        btn_save.grid(row=7, column=0, columnspan=2, pady=30)
 
-    for key, label, typ in fields:
-        current = p.get(key, '')
-        val = ask(f"{label}", default=str(current) if current is not None else '', required=False)
-        if val and val != str(current):
-            if typ == 'int':
-                try: p[key] = int(val)
-                except: pass
-            elif typ == 'float':
-                try: p[key] = float(val)
-                except: pass
-            else:
-                p[key] = val
+    def create_form_row(self, label_text, row, default=""):
+        ctk.CTkLabel(self.current_frame, text=label_text).grid(row=row, column=0, padx=10, pady=10, sticky="w")
+        entry = ctk.CTkEntry(self.current_frame, placeholder_text=label_text)
+        if default: entry.insert(0, default)
+        entry.grid(row=row, column=1, padx=10, pady=10, sticky="ew")
+        return entry
 
-    # Features
-    update_feat = ask("Modifier les fonctionnalités ? (o/n)", default="n", required=False)
-    if update_feat and update_feat.lower() in ('o','y','oui','yes'):
-        print(f"  Actuelles : {', '.join(p.get('features', []))}")
-        p['features'] = ask_list("Nouvelles fonctionnalités")
+    def save_new_product(self):
+        name = self.entry_name.get()
+        desc = self.entry_desc.get()
+        cat = self.opt_category.get()
+        lang = self.opt_lang.get()
+        is_finish = self.is_finish.get()
+        price_str = int(self.entry_price.get())
+        features = [f.strip() for f in self.entry_features.get().split(',') if f.strip()]
 
-    products[idx] = p
-    save_products(products)
-    update_stats(products)
-    success(f"Produit '{pid}' mis à jour.")
+        if not name or not desc or not str(price_str).isdigit():
+            messagebox.showerror("Erreur", "Veuillez remplir correctement les champs obligatoires (le prix doit être un nombre).")
+            return
 
-def cmd_stats():
-    banner()
-    products = load_products()
-    reviews  = load_reviews()
-    stats    = load_stats()
+        new_product = {
+            "id": random.randint(0,10**10),
+            "name": name,
+            "category": cat,
+            "is_finish":is_finish,
+            "language": lang,
+            "emoji": EMOJIS_MAP.get(cat, '📦'),
+            "price": int(price_str),
+            "description": desc,
+            "features": features,
+            "downloads": 0,
+            "created_at": datetime.now().strftime('%Y-%m-%d'),
+            "tags": ["nouveau"]
+        }
 
-    print(f"  {C.BOLD}Statistiques CodexLab{C.RESET}\n")
-    sep()
-    print(f"  {C.CYAN}Produits      :{C.RESET} {C.ACCENT}{len(products)}{C.RESET}")
-    total_dl = sum(p.get('downloads', 0) for p in products)
-    print(f"  {C.CYAN}Télécharg.    :{C.RESET} {C.ACCENT}{total_dl:,}{C.RESET}")
-    print(f"  {C.CYAN}Avis clients  :{C.RESET} {C.ACCENT}{len(reviews)}{C.RESET}")
-    if reviews:
-        avg = sum(r['rating'] for r in reviews) / len(reviews)
-        print(f"  {C.CYAN}Note moyenne  :{C.RESET} {C.ACCENT}{avg:.1f}★{C.RESET}")
-    print(f"  {C.CYAN}Développeurs  :{C.RESET} {C.ACCENT}{stats.get('total_developers',0):,}{C.RESET}")
-    print(f"  {C.CYAN}Satisfaction  :{C.RESET} {C.ACCENT}{stats.get('satisfaction_pct',99)}%{C.RESET}")
-    sep()
+        self.products.append(new_product)
+        save_products(self.products)
+        messagebox.showinfo("Succès", f"Produit '{name}' ajouté avec succès !")
+        self.show_products() # Rediriger vers la liste
 
-    if products:
-        print(f"\n  {C.BOLD}Top produits (par téléchargements){C.RESET}")
-        sorted_p = sorted(products, key=lambda x: x.get('downloads',0), reverse=True)[:5]
-        for p in sorted_p:
-            bar_len = int(p.get('downloads',0) / max(sorted_p[0].get('downloads',1), 1) * 20)
-            bar = C.ACCENT + '█' * bar_len + C.DIM + '░' * (20 - bar_len) + C.RESET
-            print(f"  {bar}  {p['name']} ({p.get('downloads',0)} DL)")
+    # --- ACTIONS RAPIDES ---
+    def export_csv(self):
+        if not self.products:
+            messagebox.showwarning("Vide", "Aucun produit à exporter.")
+            return
+            
+        export_path = BASE_DIR / f"export_products_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        fieldnames = ['id','name','category','language','price','downloads','description','created_at']
 
-    revenue_estimate = sum(p['price'] * p.get('downloads', 0) for p in products)
-    print(f"\n  {C.BOLD}Revenu estimé (si 100% conversion):{C.RESET} {C.GREEN}{revenue_estimate:,.0f}€{C.RESET}")
-    sep()
+        with open(export_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+            writer.writeheader()
+            for p in self.products:
+                writer.writerow(p)
 
-def cmd_reviews():
-    banner()
-    reviews  = load_reviews()
-    products = load_products()
+        messagebox.showinfo("Export réussi", f"Fichier exporté :\n{export_path}")
 
-    if not reviews:
-        warn("Aucun avis pour l'instant.")
-        return
+    def start_server(self):
+        port = 8080
+        class Handler(http.server.SimpleHTTPRequestHandler):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
-    print(f"  {C.BOLD}Avis clients ({len(reviews)}){C.RESET}\n")
-    sep()
+        def run_server():
+            with http.server.HTTPServer(('', port), Handler) as httpd:
+                httpd.serve_forever()
 
-    for r in reversed(reviews):
-        prod = next((p for p in products if p['id'] == r.get('product_id')), None)
-        stars = '★' * r['rating'] + '☆' * (5 - r['rating'])
-        print(f"\n  {C.YELLOW}{stars}{C.RESET}  {C.BOLD}{r['author']}{C.RESET}  {C.DIM}({r.get('role','')}){C.RESET}")
-        if prod:
-            print(f"  {C.DIM}Produit :{C.RESET} {prod.get('emoji','')} {prod['name']}")
-        print(f"  {C.DIM}Date    :{C.RESET} {r.get('date','—')}")
-        print(f"  \"{r['text']}\"")
-    sep()
-
-def cmd_export():
-    banner()
-    products = load_products()
-    if not products:
-        warn("Aucun produit à exporter.")
-        return
-
-    export_path = BASE_DIR / f"export_products_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-    fieldnames = ['id','name','category','language','price','rating','downloads','reviews_count','lines_of_code','size_kb','description','created_at','tags']
-
-    with open(export_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        for p in products:
-            row = {k: p.get(k, '') for k in fieldnames}
-            if isinstance(row['tags'], list): row['tags'] = ', '.join(row['tags'])
-            writer.writerow(row)
-
-    success(f"Exporté : {export_path}")
-
-def cmd_serve():
-    banner()
-    port = 8080
-
-    class Handler(http.server.SimpleHTTPRequestHandler):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, directory=str(BASE_DIR), **kwargs)
-        def log_message(self, format, *args):
-            print(f"  {C.DIM}[server]{C.RESET} {format % args}")
-
-    def open_browser():
-        import time; time.sleep(0.8)
+        threading.Thread(target=run_server, daemon=True).start()
         webbrowser.open(f'http://localhost:{port}')
+        self.btn_serve.configure(text="🌐 Serveur En Ligne", state="disabled", fg_color="gray")
 
-    threading.Thread(target=open_browser, daemon=True).start()
-    info(f"Serveur démarré : {C.ACCENT}http://localhost:{port}{C.RESET}")
-    info("Appuyez sur Ctrl+C pour arrêter.\n")
-    try:
-        with http.server.HTTPServer(('', port), Handler) as httpd:
-            httpd.serve_forever()
-    except KeyboardInterrupt:
-        print(f"\n  {C.DIM}Serveur arrêté.{C.RESET}")
-
-def cmd_help():
-    banner()
-    cmds = [
-        ("add",     "Ajouter un nouveau produit (interactif)"),
-        ("list",    "Lister tous les produits avec détails"),
-        ("edit",    "Modifier un produit existant"),
-        ("delete",  "Supprimer un produit"),
-        ("stats",   "Voir les statistiques du site"),
-        ("reviews", "Voir tous les avis clients"),
-        ("export",  "Exporter les produits en CSV"),
-        ("serve",   "Lancer un serveur local et ouvrir le site"),
-    ]
-    print(f"  {C.BOLD}Commandes disponibles{C.RESET}\n")
-    for cmd, desc in cmds:
-        print(f"  {C.ACCENT}python manage.py {cmd:<10}{C.RESET}  {desc}")
-    print()
-
-# ============================================================
-# ENTRY POINT
-# ============================================================
-COMMANDS = {
-    'add':     cmd_add,
-    'list':    cmd_list,
-    'edit':    cmd_edit,
-    'delete':  cmd_delete,
-    'stats':   cmd_stats,
-    'reviews': cmd_reviews,
-    'export':  cmd_export,
-    'serve':   cmd_serve,
-    'help':    cmd_help,
-}
-
-if __name__ == '__main__':
-    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
-        cmd_help()
-        if len(sys.argv) >= 2:
-            error(f"Commande inconnue : '{sys.argv[1]}'")
-        sys.exit(0)
-    COMMANDS[sys.argv[1]]()
+if __name__ == "__main__":
+    app = CodexLabApp()
+    app.mainloop()

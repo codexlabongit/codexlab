@@ -641,8 +641,7 @@ function renderProducts() {
   }
 
   const regularProducts = products.find(p => p.type !== 'custom');
-  const customProduct = products.filter(p => p.type === 'custom');
-  console.log(regularProducts,customProduct)
+  const customProduct = products.find(p => p.type === 'custom');
   let html = '';
 
   // Regular products

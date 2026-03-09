@@ -29,7 +29,7 @@
     "id": "prod_344",
     "name": "Générateurs de mots de passe très solide",
     "category": "Security",
-    "type": "wip",
+    "type": "standard",
     "language": "Python",
     "emoji": "🛡️",
     "price": 5,

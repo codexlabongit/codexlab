@@ -32,7 +32,7 @@
     "type": "standard",
     "language": "Python",
     "emoji": "🛡️",
-    "price": 50,
+    "price": 15,
     "description": "Générateurs de mots de passe avec interface design, qui génère des mots de passe très solide avec l'aléatoire",
     "features": [
       "Sécurité"
